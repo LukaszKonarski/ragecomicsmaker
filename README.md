@@ -1,4 +1,4 @@
-Rage Comics Maker
+Rage Comics Maker - ePub
 =======
 
-Simple program to prepare ACV files from images (jpg/png)
+An attempt to create an program for creating ePub Comics from jpeg/png files.
