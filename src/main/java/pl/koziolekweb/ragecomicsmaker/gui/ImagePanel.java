@@ -22,7 +22,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 
 import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR;
@@ -33,7 +35,7 @@ import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR;
  */
 public class ImagePanel extends JPanel implements ImageSelectedEventListener, FrameDroppedEventListener, DirSelectedEventListener, FrameStateChangeEventListener {
 
-	private BufferedImage image;
+	private BufferedImage  image;
 	private boolean paintNewFrame = false;
 	private int startY;
 	private int startX;
@@ -46,6 +48,10 @@ public class ImagePanel extends JPanel implements ImageSelectedEventListener, Fr
 	private RectangleDrawingMagic rdm = new RectangleDrawingMagic();
 	private Screen selectedScreen;
 	private Image scaledInstance;
+
+	private File targetDir;
+	private SimpleDateFormat sdf = new SimpleDateFormat();
+
 
 	public ImagePanel() {
 		super();
@@ -75,6 +81,23 @@ public class ImagePanel extends JPanel implements ImageSelectedEventListener, Fr
 								Math.abs(startX - endX), Math.abs(startY - endY),
 								scaledInstance.getWidth(null), scaledInstance.getHeight(null)), selectedScreen);
 						App.EVENT_BUS.post(addFrameEvent);
+
+
+
+						// Save cropped image
+                        BufferedImage cropped = image.getSubimage(startX, startY, endX, endY);
+                        BufferedImage copyOfCropped = new BufferedImage(cropped.getWidth(), cropped.getHeight(), BufferedImage.TYPE_INT_RGB);
+                        Graphics g = copyOfCropped.createGraphics();
+                        g.drawImage(cropped, 0, 0, null);
+//						String name = "/Users/lukasz/ragecomicsmaker/imageCropped.png";
+						try {
+							ImageIO.write(copyOfCropped, "png", new File("/Users/lukasz/ragecomicsmaker/imageCropped.png"));
+						} catch (IOException ex) {
+							ex.printStackTrace();
+						}
+
+
+
 					} finally {
 						repaint();
 					}
