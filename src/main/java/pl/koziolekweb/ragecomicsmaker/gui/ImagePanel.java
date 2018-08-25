@@ -89,7 +89,6 @@ public class ImagePanel extends JPanel implements ImageSelectedEventListener, Fr
                         BufferedImage copyOfCropped = new BufferedImage(cropped.getWidth(), cropped.getHeight(), BufferedImage.TYPE_INT_RGB);
                         Graphics g = copyOfCropped.createGraphics();
                         g.drawImage(cropped, 0, 0, null);
-//						String name = "/Users/lukasz/ragecomicsmaker/imageCropped.png";
 						try {
 							ImageIO.write(copyOfCropped, "png", new File("/Users/lukasz/ragecomicsmaker/imageCropped.png"));
 						} catch (IOException ex) {
