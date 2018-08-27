@@ -3,15 +3,7 @@ package pl.koziolekweb.ragecomicsmaker.gui;
 import com.google.common.eventbus.Subscribe;
 import pl.koziolekweb.ragecomicsmaker.App;
 import pl.koziolekweb.ragecomicsmaker.FrameSizeCalculator;
-import pl.koziolekweb.ragecomicsmaker.event.AddFrameEvent;
-import pl.koziolekweb.ragecomicsmaker.event.DirSelectedEvent;
-import pl.koziolekweb.ragecomicsmaker.event.DirSelectedEventListener;
-import pl.koziolekweb.ragecomicsmaker.event.FrameDroppedEvent;
-import pl.koziolekweb.ragecomicsmaker.event.FrameDroppedEventListener;
-import pl.koziolekweb.ragecomicsmaker.event.FrameStateChangeEvent;
-import pl.koziolekweb.ragecomicsmaker.event.FrameStateChangeEventListener;
-import pl.koziolekweb.ragecomicsmaker.event.ImageSelectedEvent;
-import pl.koziolekweb.ragecomicsmaker.event.ImageSelectedEventListener;
+import pl.koziolekweb.ragecomicsmaker.event.*;
 import pl.koziolekweb.ragecomicsmaker.model.Frame;
 import pl.koziolekweb.ragecomicsmaker.model.Screen;
 
@@ -33,7 +25,7 @@ import static java.awt.image.BufferedImage.TYPE_4BYTE_ABGR;
  * TODO write JAVADOC!!!
  * User: koziolek
  */
-public class ImagePanel extends JPanel implements ImageSelectedEventListener, FrameDroppedEventListener, DirSelectedEventListener, FrameStateChangeEventListener {
+public class ImagePanel extends JPanel implements ImageSelectedEventListener, FrameDroppedEventListener, DirSelectedEventListener, FrameStateChangeEventListener, CropImageEventListener {
 
 	private BufferedImage  image;
 	private boolean paintNewFrame = false;
@@ -82,21 +74,8 @@ public class ImagePanel extends JPanel implements ImageSelectedEventListener, Fr
 								scaledInstance.getWidth(null), scaledInstance.getHeight(null)), selectedScreen);
 						App.EVENT_BUS.post(addFrameEvent);
 
-
-
-						// Save cropped image
-                        BufferedImage cropped = image.getSubimage(startX, startY, endX, endY);
-                        BufferedImage copyOfCropped = new BufferedImage(cropped.getWidth(), cropped.getHeight(), BufferedImage.TYPE_INT_RGB);
-                        Graphics g = copyOfCropped.createGraphics();
-                        g.drawImage(cropped, 0, 0, null);
-						try {
-							ImageIO.write(copyOfCropped, "png", new File("/Users/lukasz/ragecomicsmaker/imageCropped.png"));
-						} catch (IOException ex) {
-							ex.printStackTrace();
-						}
-
-
-
+						CropImageEvent cropImageEvent = new CropImageEvent(image, startX, startY, endX, endY);
+						App.EVENT_BUS.post(cropImageEvent);
 					} finally {
 						repaint();
 					}
@@ -193,6 +172,24 @@ public class ImagePanel extends JPanel implements ImageSelectedEventListener, Fr
 	@Override
 	public void handelFrameStateChangeEvent(FrameStateChangeEvent event) {
 		repaint();
+	}
+
+	@Override
+	public void handleCropImageEvent(CropImageEvent event){
+
+		BufferedImage cropped = image.getSubimage(startX, startY, endX, endY);
+		BufferedImage copyOfCropped = new BufferedImage(cropped.getWidth(), cropped.getHeight(), BufferedImage.TYPE_INT_RGB);
+		Graphics g = copyOfCropped.createGraphics();
+//		g.drawImage(cropped, 0, 0,null);
+		g.drawImage(cropped, startX, startY, cropped.getWidth(), cropped.getHeight(), Color.black, null);
+
+
+		try {
+			ImageIO.write(copyOfCropped, "png", new File("/Users/lukasz/ragecomicsmaker/imageCropped.png"));
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
 	}
 
 	private boolean inImage(int posX, int posY) {
