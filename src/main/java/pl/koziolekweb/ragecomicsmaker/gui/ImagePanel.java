@@ -75,7 +75,7 @@ public class ImagePanel extends JPanel implements ImageSelectedEventListener, Fr
                                 scaledInstance.getWidth(null), scaledInstance.getHeight(null)), selectedScreen);
                         App.EVENT_BUS.post(addFrameEvent);
 
-                        CropImageEvent cropImageEvent = new CropImageEvent(image, startX, startY, endX, endY);
+                        CropImageEvent cropImageEvent = new CropImageEvent(image, Math.min(startX, endX), Math.min(startY, endY), Math.abs(startX - endX), Math.abs(startY - endY));
                         App.EVENT_BUS.post(cropImageEvent);
                     } finally {
                         repaint();
@@ -178,13 +178,16 @@ public class ImagePanel extends JPanel implements ImageSelectedEventListener, Fr
     @Override
     public void handleCropImageEvent(CropImageEvent event) {
 
-        BufferedImage cropped = image.getSubimage(startX, startY, endX, endY);
+        BufferedImage cropped = image.getSubimage(startX, startY, scaledInstance.getWidth(null), scaledInstance.getHeight(null));
         BufferedImage copyOfCropped = new BufferedImage(cropped.getWidth(), cropped.getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics g = copyOfCropped.createGraphics();
         g.drawImage(cropped, 0, 0, null);
-        
+
+//        File currentDir = jfc.getCurrentDirectory();
+//        String name = currentDir.getAbsolutePath() + "imageCropped" + sdf.format(new Date()) + ".png";
         try {
             ImageIO.write(copyOfCropped, "png", new File("/Users/lukasz/ragecomicsmaker/imageCropped" + sdf.format(new Date()) + ".png"));
+//            ImageIO.write(copyOfCropped, "png", new File(currentDir.getAbsolutePath() + "imageCropped" + sdf.format(new Date()) + ".png"));
         } catch (IOException ex) {
             ex.printStackTrace();
         }
